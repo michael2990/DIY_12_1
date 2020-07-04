@@ -80,6 +80,11 @@ payload map ((giftcards) -> {
 				</ee:transform>
 				<flow-ref doc:name="oretailplusFlow" doc:id="de3072f5-a71a-459e-9021-813663ddf203" name="oretailplusFlow"/>
 			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="330c9498-dd07-42be-8747-319fb2ed8117" message='"INVALID PARTNER"'/>
+				<set-payload value="#[vars.partnerName ++ 'is an invalid partner']" doc:name="Set Payload" doc:id="e602d3fc-3a80-4dbf-92c7-70177f406eed" />
+				<file:write doc:name="Write" doc:id="fa143aa4-d4b5-4461-9f36-da3abf821089" path="#['${partner3.fileWrite}' ++ '/REPORT']" mode="APPEND"/>
+			</otherwise>
 		</choice>
 	</flow>
 </mule>
