@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="processvisagiftcardsFlow" doc:id="fab33e3e-753c-4a6c-bb26-9fc0ac0e0e09" >
+		<file:listener doc:name="On New or Updated File" doc:id="78664199-ea82-4249-9491-dbd3b21219b9" directory="${master.fileIn}" moveToDirectory="${master.fileProcessed}">
+			<scheduling-strategy >
+				<fixed-frequency />
+			</scheduling-strategy>
+			<file:matcher filenamePattern="*.csv" />
+		</file:listener>
+		<ee:transform doc:name="CSV To Java" doc:id="02997a12-dc4c-4157-babf-527f73893103" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload[0].partner]" doc:name="partnerName" doc:id="d15252e7-762e-441c-b743-cf31713a525a" variableName="partnerName"/>
+		<set-variable value="#[sizeOf(payload)]" doc:name="recordCount" doc:id="06dca4c2-7ea7-4a29-a407-5969cff6e17b" variableName="recordCount"/>
+		<choice doc:name="Choice" doc:id="b761ad4e-5a5b-4c89-98a6-8a5e2a5d281c" >
+			<when expression="#[vars.partnerName == '${partner1.name}']">
+				<ee:transform doc:name="Transform Message" doc:id="dd46d715-76d8-4e43-9233-711dacb1290e" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ((giftcards) -> {
+	number: giftcards.card_no,
+	balance: giftcards.amount_granted,
+	sourceID: "MULEBANK-0949",
+	createdOn: now() as String {format: "yyyy-MM-dd HH:mm:ss"}
+	
+}	
+)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<flow-ref doc:name="foodnsavingsFlow" doc:id="7adf8bc9-5d97-46b3-854a-540fbcbb2458" name="foodnsavingsFlow"/>
+			</when>
+			<when expression="#[vars.partnerName == 'p{partner2.name}']">
+				<set-variable value="#[now() as Number]" doc:name="creationDate" doc:id="a3757c5b-7034-42a1-90ee-72bdb445202b" variableName="creationDate"/>
+				<ee:transform doc:name="Transform Message" doc:id="4a3fc80d-34cb-45ee-944c-176dbb03ebb8" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ((giftcards) -> {
+	gc_card_number: giftcards.card_no,
+	gc_balance: giftcards.amount_granted,
+	origin: "MULEBANK-0949",
+	card_type: "VISA",
+	expiration: (vars.creationDate + |P3M|) as Number
+	
+}	
+)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<flow-ref doc:name="mealsngoFlow" doc:id="1b3fad03-4581-4ed5-b08b-ba914f5ec721" name="mealsngoFlow"/>
+			</when>
+			<when expression="#[vars.partnerName == 'p{partner3.name}']">
+				<ee:transform doc:name="Transform Message" doc:id="ce37ec78-9a6d-497d-af15-904cb7fc4da0" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ((giftcards) -> {
+	card_no: giftcards.card_no,
+	amount: giftcards.amount_granted,
+	bankOriginationID: "MUKEBANK-0949"
+	
+}	
+)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<flow-ref doc:name="oretailplusFlow" doc:id="de3072f5-a71a-459e-9021-813663ddf203" name="oretailplusFlow"/>
+			</when>
+		</choice>
+	</flow>
+</mule>

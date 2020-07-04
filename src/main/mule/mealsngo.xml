@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd">
+	<flow name="mealsngoFlow" doc:id="fbdab487-a5d8-4aa9-8457-e17e55c4c386" >
+		<ftp:write doc:name="Write" doc:id="2b5888cc-261e-4b55-a50b-4f75e09f1ca8" config-ref="Partner2_FTP_Config" path="#['MULEBANK-gc'++ now() as String ++ '.csv']"/>
+	</flow>
+</mule>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<flow name="oretailplusFlow" doc:id="38657a1f-f07d-4da9-b78b-ff484c880a6d" >
+		<file:write doc:name="Write" doc:id="95aa9681-195c-4ca5-97cc-424da321ec2d" path="#['${partner3.fileWrite}' 
+		++'/MULEBANK' 
+		++ vars.creationDate as String 
+		++ vars.recordCount as String
+		++ '.csv']"/>
+	</flow>
+</mule>
